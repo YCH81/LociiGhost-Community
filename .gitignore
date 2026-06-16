@@ -1,0 +1,21 @@
+# Node / Astro (W3)
+node_modules/
+dist/
+.astro/
+.env
+.env.local
+.env.*.local
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Build / coverage
+build/
+coverage/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
