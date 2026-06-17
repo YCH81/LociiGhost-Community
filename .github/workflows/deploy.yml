@@ -37,7 +37,11 @@ jobs:
             - name: Setup Node
               uses: actions/setup-node@v4
               with:
-                  node-version: "20"
+                  # Node 22 adds native WebSocket, which the Supabase
+                  # Realtime client instantiates at module load. Node 20
+                  # would need an extra `ws` polyfill — see
+                  # @supabase/realtime-js/dist/main/lib/websocket-factory.js.
+                  node-version: "22"
                   cache: "npm"
                   cache-dependency-path: web/package-lock.json
 
