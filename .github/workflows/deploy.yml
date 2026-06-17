@@ -1,0 +1,74 @@
+name: Deploy web to GitHub Pages
+
+on:
+    # Auto-deploy on every push to main that touches the web/ source
+    # tree or this workflow. Other paths (supabase/, top-level docs)
+    # don't need a redeploy — the static bundle's identical.
+    push:
+        branches: [main]
+        paths:
+            - "web/**"
+            - ".github/workflows/deploy.yml"
+    # Manual trigger so an env-var-only change can ship without a
+    # source push (e.g. swapping the live Supabase project).
+    workflow_dispatch:
+
+# Concurrency: only one deploy at a time per ref so a fast
+# sequence of pushes coalesces into the latest one.
+concurrency:
+    group: "pages-${{ github.ref }}"
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: web
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+                  cache-dependency-path: web/package-lock.json
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build site
+              # PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_ANON_KEY come
+              # from repo-level Variables (not Secrets — they're
+              # public anon keys, RLS gates real access). Set them
+              # under Settings → Secrets and variables → Actions →
+              # Variables. If unset, the build still succeeds; pages
+              # just render the "Coming soon — backend not connected"
+              # state via lib/supabase.ts's isSupabaseConfigured flag.
+              env:
+                  PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+                  PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
+              run: npm run build
+
+            - name: Upload Pages artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: web/dist
+
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
