@@ -1,0 +1,42 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const currentPath = Astro.url.pathname.replace(base, '') || '/';
+
+const navItems = [
+    { href: '/', label: '首頁' },
+    { href: '/mushrooms', label: '菇點' },
+    { href: '/postcards', label: '明信片' },
+    { href: '/routes', label: '路線' },
+];
+
+function isActive(href: string) {
+    if (href === '/') return currentPath === '/' || currentPath === '';
+    return currentPath.startsWith(href);
+}
+---
+
+<header class="bg-white border-b border-sage/20">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <a href={`${base}/`} class="flex items-baseline gap-2 border-0 hover:border-0">
+            <span class="text-xl font-bold text-ink">LociiGhost</span>
+            <span class="text-sm text-muted">Community</span>
+        </a>
+        <nav class="flex gap-1 text-sm">
+            {
+                navItems.map((item) => (
+                    <a
+                        href={`${base}${item.href}`}
+                        class:list={[
+                            'px-3 py-1.5 rounded-full transition-colors border-0',
+                            isActive(item.href)
+                                ? 'bg-sage/15 text-sage-dark font-medium'
+                                : 'text-muted hover:bg-sage/10 hover:text-ink',
+                        ]}
+                    >
+                        {item.label}
+                    </a>
+                ))
+            }
+        </nav>
+    </div>
+</header>

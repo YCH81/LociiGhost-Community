@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { isSupabaseConfigured } from '../lib/supabase';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const sections = [
+    {
+        href: '/mushrooms',
+        title: '菇點',
+        emoji: '🍄',
+        description: 'Pikmin Bloom 飛人標記的菇點。紅黃藍白紫灰岩翼虹九種分類，地圖上一鍵看遍。',
+    },
+    {
+        href: '/postcards',
+        title: '明信片',
+        emoji: '📮',
+        description: '飛人們從各地寄回的明信片，含照片、地點、心得。在 LociiGhost app 中一鍵瞬移過去。',
+    },
+    {
+        href: '/routes',
+        title: '路線',
+        emoji: '🗺️',
+        description: '上傳者實際走過的 GPX 路徑與說明，下載後在 macOS app 中直接重新走一遍。',
+    },
+];
+---
+
+<BaseLayout title="LociiGhost Community — 飛人社群分享">
+    <section class="text-center py-12">
+        <h1 class="text-4xl font-bold text-ink mb-3">飛人社群分享平台</h1>
+        <p class="text-muted max-w-2xl mx-auto leading-relaxed">
+            Pikmin Bloom 玩家共享的菇點、明信片、路線。
+            <br />
+            在這裡瀏覽別人去過的地方，或上傳你自己的足跡。
+        </p>
+
+        {
+            !isSupabaseConfigured && (
+                <div class="mt-6 mx-auto max-w-xl p-4 rounded-lg bg-yellow-50 border border-yellow-300 text-yellow-900 text-sm text-left">
+                    <strong>後端尚未連接</strong> ——
+                    Supabase 環境變數還沒設定。設定步驟見
+                    <a href="https://github.com/YCH81/LociiGhost-Community/blob/main/supabase/setup.md" target="_blank" rel="noopener">
+                        supabase/setup.md
+                    </a>
+                    。所有列表頁先以 placeholder 顯示「Coming soon」。
+                </div>
+            )
+        }
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-3 my-12">
+        {
+            sections.map((s) => (
+                <a
+                    href={`${base}${s.href}`}
+                    class="block p-6 rounded-2xl bg-white border border-sage/20 hover:border-sage transition-colors border-b-0 hover:border-b-0"
+                >
+                    <div class="text-4xl mb-3">{s.emoji}</div>
+                    <h2 class="text-xl font-semibold text-ink mb-2">{s.title}</h2>
+                    <p class="text-sm text-muted leading-relaxed">{s.description}</p>
+                </a>
+            ))
+        }
+    </section>
+
+    <section class="my-12 p-6 bg-white rounded-2xl border border-sage/20">
+        <h2 class="text-xl font-semibold text-ink mb-3">配合 macOS app 用最好</h2>
+        <p class="text-muted leading-relaxed text-sm">
+            這個網站本身是公開的，每個人都可以無登入瀏覽。但每個項目都有「<strong>在 LociiGhost 中打開</strong>」按鈕 ——
+            裝了
+            <a href="https://github.com/YCH81/LociiGhost" target="_blank" rel="noopener">LociiGhost macOS app</a>
+            的飛人按下去，就會直接帶 iPhone 瞬移到那個座標，或把路線匯入到 app 的 Routes 清單。
+        </p>
+    </section>
+</BaseLayout>

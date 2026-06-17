@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { isSupabaseConfigured } from '../lib/supabase';
+---
+
+<BaseLayout title="路線 — LociiGhost Community">
+    <header class="mb-6">
+        <h1 class="text-3xl font-bold text-ink mb-2">路線</h1>
+        <p class="text-muted text-sm">飛人實際走過的 GPX 路徑，含上傳者說明。</p>
+    </header>
+
+    {
+        !isSupabaseConfigured ? (
+            <div class="p-8 rounded-2xl bg-white border border-sage/20 text-center">
+                <div class="text-4xl mb-3">🚧</div>
+                <h2 class="text-lg font-semibold text-ink mb-2">Coming soon</h2>
+                <p class="text-sm text-muted max-w-md mx-auto leading-relaxed">
+                    後端 Supabase 還沒設定，列表暫時空白。設定完成後這裡會載入路線列表、地圖預覽，
+                    以及「在 LociiGhost 中匯入」按鈕。
+                </p>
+            </div>
+        ) : (
+            <div class="p-8 rounded-2xl bg-white border border-sage/20 text-center text-muted">
+                路線列表 + 地圖預覽 UI 即將上線（W3.3）。
+            </div>
+        )
+    }
+</BaseLayout>

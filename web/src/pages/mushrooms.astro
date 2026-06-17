@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { MUSHROOM_LABELS, type MushroomType } from '../lib/types';
+
+const types: MushroomType[] = [
+    'red', 'yellow', 'blue', 'white',
+    'purple', 'gray', 'rock', 'wing', 'rainbow',
+];
+---
+
+<BaseLayout title="菇點 — LociiGhost Community">
+    <header class="mb-6">
+        <h1 class="text-3xl font-bold text-ink mb-2">菇點</h1>
+        <p class="text-muted text-sm">飛人在 Pikmin Bloom 看到的菇點分享。</p>
+    </header>
+
+    <div class="mb-6 flex flex-wrap gap-2">
+        {
+            types.map((t) => {
+                const info = MUSHROOM_LABELS[t];
+                return (
+                    <span
+                        class="px-3 py-1 rounded-full text-xs font-medium"
+                        style={`background-color: ${info.color}20; color: ${info.color};`}
+                    >
+                        <span style={`color: ${info.color};`}>●</span>
+                        {' '}
+                        {info.zh}
+                    </span>
+                );
+            })
+        }
+    </div>
+
+    {
+        !isSupabaseConfigured ? (
+            <div class="p-8 rounded-2xl bg-white border border-sage/20 text-center">
+                <div class="text-4xl mb-3">🚧</div>
+                <h2 class="text-lg font-semibold text-ink mb-2">Coming soon</h2>
+                <p class="text-sm text-muted max-w-md mx-auto leading-relaxed">
+                    後端 Supabase 還沒設定，列表暫時空白。設定完成後這裡會自動載入所有飛人上傳的菇點。
+                </p>
+            </div>
+        ) : (
+            <div class="p-8 rounded-2xl bg-white border border-sage/20 text-center text-muted">
+                列表 UI 即將上線（W3.3）。
+            </div>
+        )
+    }
+</BaseLayout>

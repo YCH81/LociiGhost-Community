@@ -1,0 +1,37 @@
+---
+import '../styles/globals.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+    title?: string;
+    description?: string;
+}
+
+const {
+    title = 'LociiGhost Community',
+    description = 'Pikmin Bloom 飛人社群分享平台 — 菇點、明信片、路線共享。',
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}/favicon.svg`} />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary" />
+    </head>
+    <body class="min-h-screen flex flex-col">
+        <Header />
+        <main class="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
+            <slot />
+        </main>
+        <Footer />
+    </body>
+</html>

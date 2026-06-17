@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Anchor reset — keep the sage underline style from the main docs
+   landing page so the visual language carries across. */
+@layer base {
+    body {
+        @apply bg-sand text-ink antialiased;
+    }
+    a {
+        @apply text-sage-dark border-b border-sage/40 transition-colors;
+        text-decoration: none;
+    }
+    a:hover {
+        @apply text-ink border-ink;
+    }
+}

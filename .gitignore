@@ -19,3 +19,8 @@ coverage/
 # Supabase local
 supabase/.branches/
 supabase/.temp/
+
+# Per-developer Claude Code launch config (local-only, points at this
+# absolute path on this machine). Each contributor can add their own
+# under ~/.claude or their workspace root.
+.claude/
