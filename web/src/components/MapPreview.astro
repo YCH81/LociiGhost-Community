@@ -1,0 +1,133 @@
+---
+/**
+ * Shared Leaflet map preview. Pass `pins: { id, lat, lng, label, color, href }[]`
+ * via JSON-serialised data attribute; the inline `<script>` reads it after
+ * Leaflet boots and drops a CircleMarker per pin, popup with label, click
+ * navigates to `href`.
+ *
+ * Why CircleMarker over Marker — CircleMarker is a CSS-styled SVG circle,
+ * no image asset needed (Leaflet's default Marker tries to fetch a PNG
+ * from a relative path that breaks under GitHub Pages subpath). One less
+ * thing to break in production.
+ */
+import 'leaflet/dist/leaflet.css';
+
+interface Pin {
+    id: string;
+    lat: number;
+    lng: number;
+    label: string;
+    color?: string;
+    href?: string;
+}
+
+interface Props {
+    pins: Pin[];
+    /** Tailwind h-* class, default h-80 (320 px). */
+    heightClass?: string;
+    /** Default centre when no pins are given. Defaults to Taipei. */
+    fallbackCenter?: { lat: number; lng: number; zoom: number };
+}
+
+const {
+    pins,
+    heightClass = 'h-80',
+    fallbackCenter = { lat: 25.0339, lng: 121.5645, zoom: 9 },
+} = Astro.props;
+
+const pinsJson = JSON.stringify(pins);
+const fallbackJson = JSON.stringify(fallbackCenter);
+---
+
+<div
+    class:list={['w-full rounded-2xl overflow-hidden border border-sage/20', heightClass]}
+    data-pins={pinsJson}
+    data-fallback={fallbackJson}
+    data-map-container
+></div>
+
+<script>
+    import L from 'leaflet';
+
+    interface RawPin {
+        id: string;
+        lat: number;
+        lng: number;
+        label: string;
+        color?: string;
+        href?: string;
+    }
+
+    document.querySelectorAll<HTMLDivElement>('[data-map-container]').forEach((el) => {
+        const pins: RawPin[] = JSON.parse(el.dataset.pins ?? '[]');
+        const fallback = JSON.parse(
+            el.dataset.fallback ?? '{"lat":25.0339,"lng":121.5645,"zoom":9}',
+        );
+
+        const map = L.map(el, {
+            zoomControl: true,
+            attributionControl: true,
+            scrollWheelZoom: false,
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+            maxZoom: 19,
+        }).addTo(map);
+
+        if (pins.length === 0) {
+            map.setView([fallback.lat, fallback.lng], fallback.zoom);
+            return;
+        }
+
+        const bounds = L.latLngBounds([]);
+        pins.forEach((p) => {
+            const marker = L.circleMarker([p.lat, p.lng], {
+                radius: 7,
+                weight: 2,
+                color: '#ffffff',
+                fillColor: p.color || '#7fa389',
+                fillOpacity: 1,
+            }).addTo(map);
+
+            const safeLabel = String(p.label).replace(
+                /[&<>"']/g,
+                (c) =>
+                    (({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;',
+                    }) as Record<string, string>)[c]!,
+            );
+            const popupHtml = p.href
+                ? `<a href="${p.href}" style="color:#5f7d68;font-weight:600;">${safeLabel}</a>`
+                : safeLabel;
+            marker.bindPopup(popupHtml);
+
+            if (p.href) {
+                marker.on('click', () => {
+                    const card = document.querySelector(`[data-card-id="${p.id}"]`);
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        card.classList.add('ring-2', 'ring-sage');
+                        setTimeout(
+                            () => card.classList.remove('ring-2', 'ring-sage'),
+                            1500,
+                        );
+                    }
+                });
+            }
+
+            bounds.extend([p.lat, p.lng]);
+        });
+
+        if (pins.length === 1) {
+            map.setView([pins[0]!.lat, pins[0]!.lng], 13);
+        } else {
+            map.fitBounds(bounds, { padding: [30, 30], maxZoom: 13 });
+        }
+    });
+</script>
